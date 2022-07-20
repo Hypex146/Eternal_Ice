@@ -1,0 +1,17 @@
+name: Eternal_Ice
+version: 0.0.1
+author: Hypex
+main: plugin.EternalIce
+api-version: 1.13
+commands:
+   ei:
+      description: Plugin commands
+   test:
+      description: Only for testing methods
+permissions:
+   ei.*:
+      description: Gives access to all commands
+   ei.admin:
+      description: Give access to admin commands
+   ei.user:
+      description: Give access to user commands
