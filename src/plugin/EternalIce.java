@@ -69,7 +69,7 @@ public class EternalIce extends JavaPlugin {
 	}
 	
 	private void printGreetingInConsole() {
-		String greeting = "===========================\n"
+		String greeting = "\n===========================\n"
 				+ "|   |     ___   ___        \n"
 				+ "|   |\\   /|  |  |     \\  / \n"
 				+ "|===| \\ / |__|  |__    \\/  \n"
