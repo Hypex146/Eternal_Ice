@@ -1,0 +1,155 @@
+# Basic plugin settings
+Main_settings:
+  # Is the plugin enabled
+  enable: true
+  # Is the greeting enabled when launching the plugin in the console
+  enable_greeting: true
+  # Logging level
+  # Possible values: MINIMAL, STANDARD, DEBUG
+  # The number of syllables depends on the level
+  # At the moment, only STANDART works correctly
+  log_level: STANDART
+  # The name of the worlds in which the plugin fully works
+  worlds: []
+
+# Settings related to scoreboard and score points
+Score_settings:
+  # Scoreboard name
+  score_name: ei_score
+  # Scoreboard display name
+  score_display_name: Shards of ice
+  # The coefficient of transferred points when killing a player
+  transfer_coeff: 0.5
+  # Coefficient of saved points after death
+  save_coeff: 0.5
+  # The time in ticks after which the killing of a mob is "forgotten"
+  # More mobs killed recently - less reward coefficient for subsequent kills
+  delay_reduce_cooldown_farm: 1200
+  # The function of calculating the reward coefficient: y = 1 / (1 + e^(sigmoida_coeff * (x - sigmoida_shift)))
+  # Format for the site https://www.desmos.com/calculator?lang=ru : y\ =\ \frac{1}{1\ +\ e^{c\cdot\left(x-s\right)}}
+  # where c - sigmoida_coeff and s - sigmoida_shift
+  sigmoida_coeff: 1.0
+  sigmoida_shift: 0.0
+
+# Settings related to levels
+Levels_settings:
+  # The highest level, i.e. the number of levels
+  max_level: 1
+  # Next comes the enumeration of the characteristics of each level according to the template below
+  # Level_<level number>:
+  #   cost: <integer> - the price of the level in score points
+  #   mana_reserve: <integer> - the amount of mana reserve at this level
+  #   add_mana_value: <integer> - the amount of mana added per "mana set event"
+  Level_1:
+    cost: 1
+    mana_reserve: 1
+    add_mana_value: 1
+
+# Mana-related settings
+Mana_settings:
+  # The interval in ticks between "mana set events"
+  add_mana_frequency: 20
+
+# Ability-related settings
+Abilities:
+  
+  # Repulsion ability Settings
+  Repulsion:
+    # Required level for use
+    required_lvl: 1
+    # Price in mana
+    mana_cost: 1
+    # Usage distance
+    dist: 1.0
+    # Vertical repulsive force
+    vertical_speed: 1.0
+    # Vertical shift of the repulsion vector
+    # More value - the player will fly higher
+    vertical_offset: 1.0
+    # Horizontal repulsive force
+    horizontal_speed: 1.0
+    # The value of the angle at which it is assumed that one player is looking at the other
+    cos_detect_angle: 0.95
+    # The largest number of players that can be pushed away in one use of the ability
+    # If the value is less than zero, then there is no limit
+    limit_repulse: 1
+    # Recharge time in the seconds
+    cooldown: 1
+    # The function of calculating the repulsion power: y = k * x + b
+    # Format for the site https://www.desmos.com/calculator?lang=ru : y=k\cdot x+b
+    # where k - linear_k and b - linear_b
+    linear_k: -1.0
+    linear_b: 1.0
+    # Message when using
+    use_message: Repulsion is used!
+    # Message when mana is low
+    low_mana_message: Not enough mana!
+    # A message if the ability is on recharge
+    cooldown_message: Ability Recharge!
+    # Message at insufficient level
+    low_lvl_message: A higher level is required to use!
+  
+  # Psy-Explosion ability settings
+  Psy_Explosion:
+    # Required level for use
+    required_lvl: 1
+    # Price in mana
+    mana_cost: 1
+    # Usage distance
+    dist: 1.0
+    # The time in ticks that the player hangs in the air before the psy-explosion
+    charging_time: 1
+    # The value of the angle at which it is assumed that one player is looking at the other
+    cos_detect_angle: 0.95
+    # Damage
+    damage: 1.0
+    # Recharge time in the seconds
+    cooldown: 1
+    # Vertical speed when ability is charging
+    vertical_speed: 0.0
+    # Message when using
+    use_message: Psy-explosion is used!
+    # Message when mana is low
+    low_mana_message: Not enough mana!
+    # A message if the ability is on recharge
+    cooldown_message: Ability Recharge!
+    # Message at insufficient level
+    low_lvl_message: A higher level is required to use!
+  
+  # Stun ability settings
+  Stun:
+    # Required level for use
+    required_lvl: 1
+    # Price in mana
+    mana_cost: 1
+    # Usage distance
+    dist: 1.0
+    # The largest number of players that can be stuned in one use of the ability
+    # If the value is less than zero, then there is no limit
+    limit_stun: 1
+    # Stun time
+    time_stun: 1
+    # The value of the angle at which it is assumed that one player is looking at the other
+    cos_detect_angle: 0.95
+    # Recharge time in seconds
+    cooldown: 1
+    # Message when using
+    use_message: Stun is used!
+    # Message when mana is low
+    low_mana_message: Not enough mana!
+    # A message if the ability is on recharge
+    cooldown_message: Ability Recharge!
+    # Message at insufficient level
+    low_lvl_message: A higher level is required to use!
+
+# Placeholder settings
+# The placeholder will look like this: %ei_<placeholder name>%
+Placeholders_settings:
+  # Player level placeholder
+  level: level
+  # Player mana placeholder
+  mana: mana
+  # Player cooldown placeholder NOT WORKING NOW
+  cooldown: cooldown # TODO
+  # Player score placeholder
+  score: score

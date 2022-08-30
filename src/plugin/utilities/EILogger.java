@@ -1,4 +1,4 @@
-package utilities;
+package plugin.utilities;
 
 import java.util.logging.Level;
 
@@ -15,7 +15,7 @@ public class EILogger {
 	
 	public EILogger(EternalIce main_plugin) {
 		main_plugin_ = main_plugin;
-		log_level_ = LogLevel.Standart;
+		log_level_ = LogLevel.STANDART;
 	}
 	
 	public void setLogLevel(LogLevel log_level) {

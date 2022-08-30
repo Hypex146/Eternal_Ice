@@ -2,16 +2,37 @@ name: Eternal_Ice
 version: 0.0.1
 author: Hypex
 main: plugin.EternalIce
-api-version: 1.13
+api-version: 1.18
+depend: [PlaceholderAPI]
 commands:
-   ei:
-      description: Plugin commands
+   eternal_ice:
+      description: Commands related to the plugin core
+      aliases: ei
+#      permission: eternal_ice.admin
+#      permission-message: You do not have permission <permission>
+#      usage: Syntax error! Perhaps you meant /<command> reload?
+   eternal_ice_level:
+      description: Level-related commands
+      aliases: [level, ei_level, lvl, ei_lvl]
+   eternal_ice_score:
+      description: Commands related to score points
+      aliases: [score, ei_score, scr, ei_scr]
+   eternal_ice_ability:
+      description: Commands related to abilities
+      aliases: [ability, ei_ability, abl, ei_abl]
    test:
-      description: Only for testing methods
+      description: Commands for testing
 permissions:
-   ei.*:
-      description: Gives access to all commands
-   ei.admin:
-      description: Give access to admin commands
-   ei.user:
-      description: Give access to user commands
+   eternal_ice.*:
+      description: Access to all plugin commands
+      default: false
+      children:
+         eternal_ice.admin: true
+   eternal_ice.admin:
+      description: Administrator access (all commands)
+      default: false
+      children:
+         eternal_ice.user: true
+   eternal_ice.user:
+      description: Player access (part of the teams)
+      default: false
