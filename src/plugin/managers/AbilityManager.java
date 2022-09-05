@@ -24,7 +24,7 @@ public class AbilityManager {
 	private EternalIce main_plugin_;
 	// configuration
 	// constants
-	private final Map<Abilities, Ability> abilities_table_;
+	private final Map<Abilities, Ability> abilities_; // TODO rename all! CHECK?
 	private final NamespacedKey r_button_key_;
 	private final NamespacedKey l_button_key_;
 	
@@ -32,10 +32,10 @@ public class AbilityManager {
 		main_plugin_ = main_plugin;
 		r_button_key_ = new NamespacedKey(main_plugin_, "r_button_action");
 		l_button_key_ = new NamespacedKey(main_plugin_, "l_button_action");
-		abilities_table_ = new HashMap<Abilities, Ability>();
-		abilities_table_.put(Abilities.PSYEXPLOSION, new PsyExplosion(main_plugin_));
-		abilities_table_.put(Abilities.STUN, new Stun(main_plugin_));
-		abilities_table_.put(Abilities.REPULSION, new Repulsion(main_plugin_));
+		abilities_ = new HashMap<Abilities, Ability>();
+		abilities_.put(Abilities.PSYEXPLOSION, new PsyExplosion(main_plugin_));
+		abilities_.put(Abilities.STUN, new Stun(main_plugin_));
+		abilities_.put(Abilities.REPULSION, new Repulsion(main_plugin_));
 	}
 	
 	public void updateParams() {
@@ -43,12 +43,34 @@ public class AbilityManager {
 	}
 	
 	private void updateAbilities() {
-		abilities_table_.forEach(new BiConsumer<Abilities, Ability>() {
+		abilities_.forEach(new BiConsumer<Abilities, Ability>() {
 			@Override
 			public void accept(Abilities t, Ability u) {
 				u.updateParams();
 			}
 		});
+	}
+	
+	public int getCooldown(Player player, boolean isRBM) { // TODO CHECK?
+		ItemStack item_stack = player.getEquipment().getItemInMainHand();
+		PersistentDataContainer container = item_stack.getItemMeta().getPersistentDataContainer();
+		NamespacedKey current_key;
+		if (isRBM) {
+			current_key = r_button_key_;
+		} else {
+			current_key = l_button_key_;
+		}
+		String tag = container.getOrDefault(current_key, PersistentDataType.STRING, null);
+		if (tag == null) { return -1; }
+		Abilities ability_type = null;
+		try {
+			ability_type = Abilities.valueOf(tag);
+		} catch (Exception e) {
+			player.sendMessage("Ошибка при вызове способности!");
+		}
+		if (ability_type == null) { return -1; }
+		Ability ability = abilities_.get(ability_type);
+		return ability.getCooldown(player);
 	}
 	
 	public void processClickEvent(PlayerInteractEvent event) {
@@ -78,7 +100,7 @@ public class AbilityManager {
 			player.sendMessage("Ошибка при вызове способности!");
 		}
 		if (ability == null) { return; }
-		abilities_table_.get(ability).onCall(player);
+		abilities_.get(ability).onCall(player);
 	}
 	
 	public NamespacedKey getRightClickTag() {

@@ -26,7 +26,7 @@ import plugin.utilities.EIConfigurator;
 import plugin.utilities.EILogger;
 import plugin.utilities.LogLevel;
 
-public class EternalIce extends JavaPlugin {
+public class EternalIce extends JavaPlugin { //TODO all is interface
 	private FileConfiguration config_;
 	private EIConfigurator configurator_;
 	private EILogger logger_;
@@ -107,7 +107,7 @@ public class EternalIce extends JavaPlugin {
 		config_ = getConfig();
 		ConfigurationSection main_section = configurator_.getConfigurationSection(config_, "Main_settings");
 		LogLevel log_level = LogLevel.toEnum(configurator_.getString(main_section, 
-				"log_level", LogLevel.DEBUG.toString()));
+				"log_level", LogLevel.STANDART.toString()));
 		if (log_level == null) {
 			configurator_.setString(main_section, "log_level", LogLevel.STANDART.toString());
 			log_level = LogLevel.STANDART;

@@ -1,7 +1,7 @@
 package plugin.commands;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -72,7 +72,7 @@ public class LevelCommand implements CommandExecutor {
 			sender.sendMessage("У вас нет прав для выполнения данной комманды!");
 			return false;
 		}
-		ArrayList<HashMap<String, Object>> level_table = main_plugin_.getLevelManager().getLevelTable();
+		List<Map<String, Object>> level_table = main_plugin_.getLevelManager().getLevelTable();
 		int max_level = main_plugin_.getLevelManager().getMaxLevel();
 		sender.sendMessage("Всего уровней: " + max_level);
 		for (int i = 0; i < max_level; i++) {

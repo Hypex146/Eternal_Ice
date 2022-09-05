@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -19,22 +20,22 @@ import org.bukkit.util.Vector;
 
 import plugin.EternalIce;
 import plugin.utilities.EIConfigurator;
-import plugin.utilities.MyExpansion;
+import plugin.utilities.MyUtilities;
 
 public class PsyExplosion implements Ability {
 	private EternalIce main_plugin_;
-	private Map<String, Integer> cooldowns_table_;
+	private Map<String, Integer> cooldowns_;
 	private int cooldown_task_id_;
 	// configuration
-	private Map<String, Object> ability_table_;
+	private Map<String, Object> params_;
 	// constants
 	private final String ability_name_ = "Psy_Explosion";
 	private final Abilities type_ = Abilities.PSYEXPLOSION;
 	
 	public PsyExplosion(EternalIce main_plugin) {
 		main_plugin_ = main_plugin;
-		cooldowns_table_ = new HashMap<String, Integer>();
-		ability_table_ = new HashMap<String, Object>();
+		cooldowns_ = new HashMap<String, Integer>();
+		params_ = new HashMap<String, Object>();
 	}
 	
 	@Override
@@ -48,7 +49,7 @@ public class PsyExplosion implements Ability {
 	
 	private void updateAbilityTable(ConfigurationSection ability_section) {
 		EIConfigurator ei_cfg = main_plugin_.getEIConfigurator();
-		ability_table_.clear();
+		params_.clear();
 		Integer required_lvl = ei_cfg.getInt(ability_section, "required_lvl", 1);
 		Integer mana_cost = ei_cfg.getInt(ability_section, "mana_cost", 1);
 		Double dist = ei_cfg.getDouble(ability_section, "dist", 1);
@@ -65,18 +66,36 @@ public class PsyExplosion implements Ability {
 				"cooldown_message", "Перезарядка способности!");
 		String low_lvl_message = ei_cfg.getString(ability_section, 
 				"low_lvl_message", "Для ипользования требуется больший уровень!");
-		ability_table_.put("required_lvl", required_lvl);
-		ability_table_.put("mana_cost", mana_cost);
-		ability_table_.put("dist", dist);
-		ability_table_.put("charging_time", charging_time);
-		ability_table_.put("cos_detect_angle", cos_detect_angle);
-		ability_table_.put("damage", damage);
-		ability_table_.put("cooldown", cooldown);
-		ability_table_.put("vertical_speed", vertical_speed);
-		ability_table_.put("use_message", use_message);
-		ability_table_.put("low_mana_message", low_mana_message);
-		ability_table_.put("cooldown_message", cooldown_message);
-		ability_table_.put("low_lvl_message", low_lvl_message);
+		Collection<Material> material_filter = new ArrayList<Material>();
+		List<String> str_material_filter = ei_cfg.getStringList(ability_section, "transparent_materials");
+		for (String str_material : str_material_filter) {
+			try {
+				Material material = Material.valueOf(str_material);
+				material_filter.add(material);
+			} catch (IllegalArgumentException e) {}
+		}
+		Collection<EntityType> entity_filter = new ArrayList<EntityType>();
+		List<String> str_entity_filter = ei_cfg.getStringList(ability_section, "susceptible_entities");
+		for (String str_material : str_entity_filter) {
+			try {
+				EntityType material = EntityType.valueOf(str_material);
+				entity_filter.add(material);
+			} catch (IllegalArgumentException e) {}
+		}
+		params_.put("required_lvl", required_lvl);
+		params_.put("mana_cost", mana_cost);
+		params_.put("dist", dist);
+		params_.put("charging_time", charging_time);
+		params_.put("cos_detect_angle", cos_detect_angle);
+		params_.put("damage", damage);
+		params_.put("cooldown", cooldown);
+		params_.put("vertical_speed", vertical_speed);
+		params_.put("use_message", use_message);
+		params_.put("low_mana_message", low_mana_message);
+		params_.put("cooldown_message", cooldown_message);
+		params_.put("low_lvl_message", low_lvl_message);
+		params_.put("transparent_materials", material_filter);
+		params_.put("susceptible_entities", entity_filter);
 		updateCooldownTask();
 	}
 	
@@ -100,16 +119,16 @@ public class PsyExplosion implements Ability {
 	}
 	
 	@Override
-	public Map<String, Object> getAbilityTable() {
-		return ability_table_;
+	public Map<String, Object> getParams() {
+		return params_;
 	}
 	
 	private void useAbility(Player player) {
-		player.sendMessage((String) ability_table_.get("use_message"));
+		player.sendMessage((String) params_.get("use_message"));
 		Location loc = player.getLocation();
 		player.getWorld().spawnParticle(Particle.CLOUD, loc, 25, 0.5, 0.5, 0.5, 0.1);
-		int charging_time = (int) ability_table_.get("charging_time");
-		double vertical_speed = (double) ability_table_.get("vertical_speed");
+		int charging_time = (int) params_.get("charging_time");
+		double vertical_speed = (double) params_.get("vertical_speed");
 		Vector velocity = player.getVelocity();
 		velocity.setX(0D);
 		velocity.setZ(0D);
@@ -117,6 +136,7 @@ public class PsyExplosion implements Ability {
 		main_plugin_.getServer().getScheduler().scheduleSyncDelayedTask(main_plugin_, 
 				new Runnable() {
 					private int count_ = 0;
+					@SuppressWarnings("unchecked")
 					@Override
 					public void run() {
 						count_++;
@@ -129,15 +149,15 @@ public class PsyExplosion implements Ability {
 							current_loc.setY(current_loc.getY() + 0.5D);
 							player.getWorld().spawnParticle(Particle.DRAGON_BREATH, 
 									current_loc, 75, 0.5, 0.5, 0.5, 0.25);
-							List<EntityType> filter = new ArrayList<EntityType>();
-							filter.add(EntityType.PLAYER);
-							Collection<LivingEntity> preys = MyExpansion.getLookingEntities(
+							List<EntityType> filter = (ArrayList<EntityType>) params_.get("susceptible_entities");
+							Collection<LivingEntity> preys = MyUtilities.getLookingEntities(
 									player,
-									MyExpansion.createPredicate(filter),
-									(double) ability_table_.get("dist"),
-									(double) ability_table_.get("cos_detect_angle"));
+									MyUtilities.createPredicate(filter),
+									(double) params_.get("dist"),
+									(double) params_.get("cos_detect_angle"),
+									(ArrayList<Material>) params_.get("transparent_materials"));
 							for (LivingEntity prey : preys) {
-								prey.damage((double) ability_table_.get("damage"));
+								prey.damage((double) params_.get("damage"), player);
 							}
 						}
 					}
@@ -182,17 +202,17 @@ public class PsyExplosion implements Ability {
 	@Override
 	public boolean canCall(Player player) {
 		if (main_plugin_.getLevelManager().getLevel(player) < 
-				(int) ability_table_.get("required_lvl")) {
-			player.sendMessage((String) ability_table_.get("low_lvl_message"));
+				(int) params_.get("required_lvl")) {
+			player.sendMessage((String) params_.get("low_lvl_message"));
 			return false;
 			}
 		if (main_plugin_.getManaManager().getMana(player) < 
-				(int) ability_table_.get("mana_cost")) {
-			player.sendMessage((String) ability_table_.get("low_mana_message"));
+				(int) params_.get("mana_cost")) {
+			player.sendMessage((String) params_.get("low_mana_message"));
 			return false;
 		}
-		if (cooldowns_table_.containsKey(player.getName())) {
-			player.sendMessage((String) ability_table_.get("cooldown_message"));
+		if (cooldowns_.containsKey(player.getName())) {
+			player.sendMessage((String) params_.get("cooldown_message"));
 			return false;
 		}
 		return true;
@@ -202,8 +222,8 @@ public class PsyExplosion implements Ability {
 	public boolean onCall(Player player) {
 		if (!canCall(player)) { return false; }
 		main_plugin_.getManaManager().addMana(player, 
-				(-1) * (int) ability_table_.get("mana_cost"));
-		cooldowns_table_.put(player.getName(), (Integer) ability_table_.get("cooldown"));
+				(-1) * (int) params_.get("mana_cost"));
+		cooldowns_.put(player.getName(), (Integer) params_.get("cooldown"));
 		useAbility(player);
 		return false;
 	}
@@ -223,24 +243,29 @@ public class PsyExplosion implements Ability {
 			@Override
 			public void run() {
 				Collection<String> for_del = new ArrayList<String>();
-				cooldowns_table_.forEach(new BiConsumer<String, Integer>() {
+				cooldowns_.forEach(new BiConsumer<String, Integer>() {
 					@Override
 					public void accept(String t, Integer u) {
 						Integer new_value = u - 1;
 						if (new_value <= 0) {
 							for_del.add(t);
 						} else {
-							cooldowns_table_.replace(t, new_value);
+							cooldowns_.replace(t, new_value);
 						}
 					}
 				});
 				for (String name : for_del) {
-					cooldowns_table_.remove(name);
+					cooldowns_.remove(name);
 				}
 			}
 		};
 		cooldown_task_id_ = main_plugin_.getServer().getScheduler().scheduleSyncRepeatingTask(
 				main_plugin_, task, 20, 20);
+	}
+
+	@Override
+	public int getCooldown(Player player) {
+		return cooldowns_.getOrDefault(player.getName(), 0);
 	}
 
 }

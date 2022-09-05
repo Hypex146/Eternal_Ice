@@ -9,6 +9,8 @@ import plugin.EternalIce;
 
 public class ScoreCommand implements CommandExecutor {
 	private EternalIce main_plugin_;
+	// configuration
+	// constants
 	
 	public ScoreCommand(EternalIce main_plugin) {
 		main_plugin_ = main_plugin;

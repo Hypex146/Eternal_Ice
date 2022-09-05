@@ -8,6 +8,8 @@ import plugin.EternalIce;
 
 public class TestCommand  implements CommandExecutor {
 	private EternalIce main_plugin_;
+	// configuration
+	// constants
 	
 	public TestCommand (EternalIce main_plugin) {
 		this.main_plugin_ = main_plugin;

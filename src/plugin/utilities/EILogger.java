@@ -7,6 +7,8 @@ import plugin.EternalIce;
 public class EILogger {
 	private EternalIce main_plugin_;
 	private LogLevel log_level_;
+	// configuration
+	// constants
 	
 	public EILogger(EternalIce main_plugin, LogLevel log_level) {
 		main_plugin_ = main_plugin;

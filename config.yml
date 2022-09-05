@@ -25,11 +25,13 @@ Score_settings:
   # The time in ticks after which the killing of a mob is "forgotten"
   # More mobs killed recently - less reward coefficient for subsequent kills
   delay_reduce_cooldown_farm: 1200
-  # The function of calculating the reward coefficient: y = 1 / (1 + e^(sigmoida_coeff * (x - sigmoida_shift)))
-  # Format for the site https://www.desmos.com/calculator?lang=ru : y\ =\ \frac{1}{1\ +\ e^{c\cdot\left(x-s\right)}}
-  # where c - sigmoida_coeff and s - sigmoida_shift
-  sigmoida_coeff: 1.0
-  sigmoida_shift: 0.0
+  # The function of calculating the reward coefficient: y = k * x + b
+  # Format for the site https://www.desmos.com/calculator?lang=ru : y\ =\ k\cdot\ x\ +\ b
+  # where k - linear_k_ and b - linear_b_
+  # Note: y = [1, 0]
+  # The function has the form of a step
+  linear_k_: 0.0
+  linear_b_: 1.0
 
 # Settings related to levels
 Levels_settings:
@@ -61,6 +63,8 @@ Abilities:
     mana_cost: 1
     # Usage distance
     dist: 1.0
+    # Damage
+    damage: 1.0
     # Vertical repulsive force
     vertical_speed: 1.0
     # Vertical shift of the repulsion vector
@@ -80,6 +84,10 @@ Abilities:
     # where k - linear_k and b - linear_b
     linear_k: -1.0
     linear_b: 1.0
+    # Transparent materials.
+    transparent_materials: [AIR]
+    # Entities that are affected by the ability
+    susceptible_entities: [PLAYER]
     # Message when using
     use_message: Repulsion is used!
     # Message when mana is low
@@ -107,6 +115,10 @@ Abilities:
     cooldown: 1
     # Vertical speed when ability is charging
     vertical_speed: 0.0
+    # Transparent materials.
+    transparent_materials: [AIR]
+    # Entities that are affected by the ability
+    susceptible_entities: [PLAYER]
     # Message when using
     use_message: Psy-explosion is used!
     # Message when mana is low
@@ -133,6 +145,10 @@ Abilities:
     cos_detect_angle: 0.95
     # Recharge time in seconds
     cooldown: 1
+    # Transparent materials.
+    transparent_materials: [AIR]
+    # Entities that are affected by the ability
+    susceptible_entities: [PLAYER]
     # Message when using
     use_message: Stun is used!
     # Message when mana is low
@@ -149,7 +165,9 @@ Placeholders_settings:
   level: level
   # Player mana placeholder
   mana: mana
-  # Player cooldown placeholder NOT WORKING NOW
-  cooldown: cooldown # TODO
+  # Player cooldown RBM ability placeholder
+  cooldown_right: cooldown_right
+  # Player cooldown LBM ability placeholder
+  cooldown_left: cooldown_left
   # Player score placeholder
   score: score

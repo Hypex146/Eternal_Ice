@@ -8,6 +8,8 @@ import plugin.EternalIce;
 
 public class PlayerJoinEventListener implements Listener {
 	private EternalIce main_plugin_;
+	// configuration
+	// constants
 	
 	public PlayerJoinEventListener(EternalIce main_plugin) {
 		main_plugin_ = main_plugin;

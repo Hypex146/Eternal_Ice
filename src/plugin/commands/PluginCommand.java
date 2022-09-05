@@ -10,6 +10,7 @@ import plugin.EternalIce;
 public class PluginCommand implements CommandExecutor {
 	private EternalIce main_plugin_;
 	// configuration
+	// constants
 	
 	public PluginCommand (EternalIce main_plugin) {
 		this.main_plugin_ = main_plugin;

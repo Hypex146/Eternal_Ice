@@ -16,6 +16,8 @@ import plugin.EternalIce;
 
 public class EIConfigurator {
 	private EternalIce main_plugin_;
+	// configuration
+	// constants
 	
 	public EIConfigurator(EternalIce main_plugin) {
 		main_plugin_ = main_plugin;

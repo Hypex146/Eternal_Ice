@@ -11,6 +11,8 @@ import plugin.EternalIce;
 
 public class DeathEventListener implements Listener {
 	private EternalIce main_plugin_;
+	// configuration
+	// constants
 	
 	public DeathEventListener(EternalIce main_plugin) {
 		main_plugin_ = main_plugin;

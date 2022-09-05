@@ -1,7 +1,8 @@
 package plugin.managers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -14,6 +15,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 
 import plugin.EternalIce;
 import plugin.utilities.EIConfigurator;
+import plugin.utilities.LogLevel;
 
 public class ManaManager {
 	private EternalIce main_plugin_;
@@ -63,7 +65,7 @@ public class ManaManager {
 		int new_mana = mana + current_mana;
 		if (!setMana(player, new_mana)) { return false; }
 		if (can_overfill) { return true; }
-		ArrayList<HashMap<String, Object>> level_table = main_plugin_.getLevelManager().getLevelTable();
+		List<Map<String, Object>> level_table = main_plugin_.getLevelManager().getLevelTable();
 		int level = main_plugin_.getLevelManager().getLevel(player);
 		int max_mana = (int) level_table.get(level - 1).get("mana_reserve");
 		if (max_mana < new_mana) {
@@ -88,17 +90,22 @@ public class ManaManager {
 	
 	private float getManaBarFill(Player player) {
 		int current_mana = getMana(player);
-		ArrayList<HashMap<String, Object>> level_table = main_plugin_.getLevelManager().getLevelTable();
+		List<Map<String, Object>> level_table = main_plugin_.getLevelManager().getLevelTable();
 		int level = main_plugin_.getLevelManager().getLevel(player);
 		int max_mana = (int) level_table.get(level - 1).get("mana_reserve");
 		return ((float)current_mana / (float)max_mana);
 	}
 	
-	private void refillMana() { // FIXME
+	private void refillMana() { // FIXME level CHECK?
 		for (World world : main_plugin_.getWorlds()) {
 			for (Player player : world.getPlayers()) {
-				ArrayList<HashMap<String, Object>> level_table = main_plugin_.getLevelManager().getLevelTable();
+				List<Map<String, Object>> level_table = main_plugin_.getLevelManager().getLevelTable();
 				int level = main_plugin_.getLevelManager().getLevel(player);
+				if (level > main_plugin_.getLevelManager().getMaxLevel()) {
+					level = main_plugin_.getLevelManager().getMaxLevel();
+					main_plugin_.getEILogger().log(LogLevel.STANDART, Level.WARNING, 
+							"У игрока " + player.getName() + " некорректный уровень!");
+				}
 				int add_mana_value = (int) level_table.get(level - 1).get("add_mana_value");
 				addMana(player, add_mana_value, false);
 				player.setLevel(getMana(player));

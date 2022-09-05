@@ -1,6 +1,8 @@
 package plugin.managers;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.NamespacedKey;
@@ -22,34 +24,37 @@ public class ScoreManager {
 	private Scoreboard board_;
 	private int cooldown_task_id_;
 	// configuration
-	private String score_name_;
-	private String score_disp_name_;
-	private double transfer_coeff_;
-	private double save_coeff_;
-	private int delay_reduce_cooldown_farm_;
-	private double sigmoida_coeff_;
-	private double sigmoida_shift_;
+	private final Map<String, Object> params_;
 	// const
 	private final NamespacedKey score_reward_key_;
 	private final NamespacedKey cooldown_farm_key_;
 	
 	public ScoreManager(EternalIce main_plugin) {
 		main_plugin_ = main_plugin;
+		params_ = new HashMap<String, Object>();
 		score_reward_key_ = new NamespacedKey(main_plugin_, "score_reward");
 		cooldown_farm_key_ = new NamespacedKey(main_plugin_, "score_cooldown");
 	}
 	
-	public void updateParams() {
+	public void updateParams() { // TODO make Map CHECK?
 		FileConfiguration cfg = main_plugin_.getConfig();
 		EIConfigurator ei_cfg = main_plugin_.getEIConfigurator();
 		ConfigurationSection score_section = ei_cfg.getConfigurationSection(cfg, "Score_settings");
-		score_name_ = ei_cfg.getString(score_section, "score_name", "ei_score");
-		score_disp_name_ = ei_cfg.getString(score_section, "score_display_name", "Shards of ice");
-		transfer_coeff_ = ei_cfg.getDouble(score_section, "transfer_coeff", 0.5D);
-		save_coeff_ = ei_cfg.getDouble(score_section, "save_coeff", 0.5D);
-		delay_reduce_cooldown_farm_ = ei_cfg.getInt(score_section, "delay_reduce_cooldown_farm", 1 * 60 * 20);
-		sigmoida_coeff_ = ei_cfg.getDouble(score_section, "sigmoida_coeff", 1D);
-		sigmoida_shift_ = ei_cfg.getDouble(score_section, "sigmoida_shift", 0D);
+		params_.clear();
+		String score_name_ = ei_cfg.getString(score_section, "score_name", "ei_score");
+		String score_disp_name_ = ei_cfg.getString(score_section, "score_display_name", "Shards of ice");
+		Double transfer_coeff_ = ei_cfg.getDouble(score_section, "transfer_coeff", 0.5D);
+		Double save_coeff_ = ei_cfg.getDouble(score_section, "save_coeff", 0.5D);
+		Integer delay_reduce_cooldown_farm_ = ei_cfg.getInt(score_section, "delay_reduce_cooldown_farm", 1 * 60 * 20);
+		Double linear_k_ = ei_cfg.getDouble(score_section, "linear_k", 0D);
+		Double linear_b_ = ei_cfg.getDouble(score_section, "linear_b", 1D);
+		params_.put("score_name", score_name_);
+		params_.put("score_disp_name", score_disp_name_);
+		params_.put("transfer_coeff", transfer_coeff_);
+		params_.put("save_coeff", save_coeff_);
+		params_.put("delay_reduce_cooldown_farm", delay_reduce_cooldown_farm_);
+		params_.put("linear_k", linear_k_);
+		params_.put("linear_b", linear_b_);
 		updateCooldownTask();
 		loadScoreboard();
 	}
@@ -66,13 +71,20 @@ public class ScoreManager {
 	public void loadScoreboard() {
 		Scoreboard board = main_plugin_.getServer().getScoreboardManager().getMainScoreboard();
 		board_ = board;
-		if (board.getObjective(score_name_) != null) { return; }
-		board.registerNewObjective(score_name_, "dummy", score_disp_name_);
+		String score_name = (String) params_.get("score_name");
+		String score_disp_name = (String) params_.get("score_disp_name");
+		if (board.getObjective(score_name) != null) { return; }
+		board.registerNewObjective(score_name, "dummy", score_disp_name);
 		main_plugin_.getEILogger().log(LogLevel.DEBUG, Level.INFO, "Зарегистрировали новую цель в scorboard");
 	}
-	
-	private double sigmoida(int x) { // TODO
-		return (1) / (1 + Math.exp(sigmoida_coeff_ * (x - sigmoida_shift_)));
+
+	private double linear(int x) { // TODO CHECK?
+		double linear_k = (double) params_.get("linear_k");
+		double linear_b = (double) params_.get("linear_b");
+		double res = linear_k * x + linear_b;
+		if (res > 1) { res = 1D; }
+		if (res < 0) { res = 0D; }
+		return res;
 	}
 	
 	private void addCooldownFarm(Player player) {
@@ -104,8 +116,9 @@ public class ScoreManager {
 				reduceCooldownFarm();
 			}
 		};
+		int delay_reduce_cooldown_farm = (int) params_.get("delay_reduce_cooldown_farm");
 		cooldown_task_id_ = main_plugin_.getServer().getScheduler().scheduleSyncRepeatingTask(main_plugin_, 
-				task, delay_reduce_cooldown_farm_, delay_reduce_cooldown_farm_);
+				task, delay_reduce_cooldown_farm, delay_reduce_cooldown_farm);
 		return;
 	}
 	
@@ -116,8 +129,9 @@ public class ScoreManager {
 	public boolean takeRewardForMob(Player player, LivingEntity mob) {
 		int reward = mob.getPersistentDataContainer().getOrDefault(score_reward_key_, PersistentDataType.INTEGER, 0);
 		if (reward <= 0) { return false; }
-		reward = (int) Math.floor(reward * sigmoida(getCooldownFarm(player))) + 1;
-		Score score = board_.getObjective(score_name_).getScore(player.getName());
+		reward = (int) Math.floor(reward * linear(getCooldownFarm(player))) + 1;
+		String score_name = (String) params_.get("score_name");
+		Score score = board_.getObjective(score_name).getScore(player.getName());
 		int old_score = score.getScore();
 		int new_score = old_score + reward;
 		score.setScore(new_score);
@@ -126,22 +140,28 @@ public class ScoreManager {
 	}
 	
 	public void takeRewardForPlayer(Player killer, Player prey) {
-		Score killer_score = board_.getObjective(score_name_).getScore(killer.getName());
-		Score prey_score = board_.getObjective(score_name_).getScore(prey.getName());
-		int transfer_score = (int) Math.floor(prey_score.getScore() * transfer_coeff_);
-		int save_score = (int) Math.floor(prey_score.getScore() * save_coeff_);
+		String score_name = (String) params_.get("score_name");
+		double transfer_coeff = (double) params_.get("transfer_coeff");
+		double save_coeff = (double) params_.get("save_coeff");
+		Score killer_score = board_.getObjective(score_name).getScore(killer.getName());
+		Score prey_score = board_.getObjective(score_name).getScore(prey.getName());
+		int transfer_score = (int) Math.floor(prey_score.getScore() * transfer_coeff);
+		int save_score = (int) Math.floor(prey_score.getScore() * save_coeff);
 		killer_score.setScore(killer_score.getScore() + transfer_score);
 		prey_score.setScore(save_score);
 	}
 	
 	public void takePenaltyFromPlayer(Player prey) {
-		Score prey_score = board_.getObjective(score_name_).getScore(prey.getName());
-		int save_score = (int) Math.floor(prey_score.getScore() * save_coeff_);
+		String score_name = (String) params_.get("score_name");
+		double save_coeff = (double) params_.get("save_coeff");
+		Score prey_score = board_.getObjective(score_name).getScore(prey.getName());
+		int save_score = (int) Math.floor(prey_score.getScore() * save_coeff);
 		prey_score.setScore(save_score);
 	}
 	
 	public boolean takeScoreFromPlayer(Player player, int score) {
-		Score player_score = board_.getObjective(score_name_).getScore(player.getName());
+		String score_name = (String) params_.get("score_name");
+		Score player_score = board_.getObjective(score_name).getScore(player.getName());
 		if (player_score.getScore() < score) {
 			return false;
 		}
@@ -150,17 +170,20 @@ public class ScoreManager {
 	}
 	
 	public void addScoreToPlayer(Player player, int score) {
-		Score player_score = board_.getObjective(score_name_).getScore(player.getName());
+		String score_name = (String) params_.get("score_name");
+		Score player_score = board_.getObjective(score_name).getScore(player.getName());
 		player_score.setScore(player_score.getScore() + score);
 	}
 	
 	public int getScore(Player player) {
-		Score player_score = board_.getObjective(score_name_).getScore(player.getName());
+		String score_name = (String) params_.get("score_name");
+		Score player_score = board_.getObjective(score_name).getScore(player.getName());
 		return player_score.getScore();
 	}
 	
 	public void setScore(Player player, int score) {
-		Score player_score = board_.getObjective(score_name_).getScore(player.getName());
+		String score_name = (String) params_.get("score_name");
+		Score player_score = board_.getObjective(score_name).getScore(player.getName());
 		player_score.setScore(score);
 	}
 	
