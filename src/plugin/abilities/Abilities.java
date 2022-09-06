@@ -4,4 +4,5 @@ public enum Abilities {
 	PSYEXPLOSION,
 	STUN,
 	REPULSION,
+	PULL
 }
