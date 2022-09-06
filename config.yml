@@ -55,7 +55,7 @@ Mana_settings:
 # Ability-related settings
 Abilities:
   
-  # Repulsion ability Settings
+  # Repulsion ability settings
   Repulsion:
     # Required level for use
     required_lvl: 1
@@ -90,6 +90,48 @@ Abilities:
     susceptible_entities: [PLAYER]
     # Message when using
     use_message: Repulsion is used!
+    # Message when mana is low
+    low_mana_message: Not enough mana!
+    # A message if the ability is on recharge
+    cooldown_message: Ability Recharge!
+    # Message at insufficient level
+    low_lvl_message: A higher level is required to use!
+    
+  # Pull ability settings
+  Repulsion:
+    # Required level for use
+    required_lvl: 1
+    # Price in mana
+    mana_cost: 1
+    # Usage distance
+    dist: 1.0
+    # Damage
+    damage: 1.0
+    # Vertical repulsive force
+    vertical_speed: 1.0
+    # Vertical shift of the repulsion vector
+    # More value - the player will fly higher
+    vertical_offset: 1.0
+    # Horizontal repulsive force
+    horizontal_speed: 1.0
+    # The value of the angle at which it is assumed that one player is looking at the other
+    cos_detect_angle: 0.95
+    # The largest number of players that can be pushed away in one use of the ability
+    # If the value is less than zero, then there is no limit
+    limit_repulse: 1
+    # Recharge time in the seconds
+    cooldown: 1
+    # The function of calculating the repulsion power: y = k * x + b
+    # Format for the site https://www.desmos.com/calculator?lang=ru : y=k\cdot x+b
+    # where k - linear_k and b - linear_b
+    linear_k: -1.0
+    linear_b: 1.0
+    # Transparent materials.
+    transparent_materials: [AIR]
+    # Entities that are affected by the ability
+    susceptible_entities: [PLAYER]
+    # Message when using
+    use_message: Pull is used!
     # Message when mana is low
     low_mana_message: Not enough mana!
     # A message if the ability is on recharge
