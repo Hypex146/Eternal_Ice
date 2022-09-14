@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.configuration.ConfigurationSection;
@@ -14,8 +15,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.Vector;
 
@@ -123,7 +122,7 @@ public class Stun implements Ability {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void useAbility(Player player) { // FIXME jump CHECK?
+	private void useAbility(Player player) {
 		player.sendMessage((String) params_.get("use_message"));
 		List<EntityType> filter = (ArrayList<EntityType>) params_.get("susceptible_entities");
 		Collection<LivingEntity> preys;
@@ -142,16 +141,26 @@ public class Stun implements Ability {
 		}
 		if (preys!=null) {
 			for (LivingEntity prey : preys) {
-//				if(prey.hasPotionEffect(PotionEffectType.SLOW)) { FIXME CHECK?
-//					prey.removePotionEffect(PotionEffectType.SLOW);
-//				}
 				Vector velocity = prey.getVelocity();
 				velocity.setX(0D);
 				velocity.setY(0D);
 				velocity.setZ(0D);
 				prey.setVelocity(velocity);
-				prey.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, time_stun, 9));
 				prey.getWorld().spawnParticle(Particle.CLOUD, prey.getLocation(), 25, 0.5, 0.5, 0.5, 0.25);
+				Location loc = prey.getLocation();
+				main_plugin_.getServer().getScheduler().scheduleSyncDelayedTask(main_plugin_, 
+						new Runnable() {
+							private int count_ = 0;
+							@Override
+							public void run() {
+								count_++;
+								if (count_ <= time_stun) {
+									prey.teleport(loc);
+									main_plugin_.getServer().getScheduler().scheduleSyncDelayedTask(
+											main_plugin_, this, 1);
+								}
+							}
+					}, 0);
 			}
 		}
 	}
@@ -216,7 +225,8 @@ public class Stun implements Ability {
 				}
 			}
 		};
-		main_plugin_.getServer().getScheduler().scheduleSyncRepeatingTask(main_plugin_, task, 20, 20);
+		cooldown_task_id_ = main_plugin_.getServer().getScheduler().scheduleSyncRepeatingTask(
+				main_plugin_, task, 20, 20);
 	}
 
 	@Override

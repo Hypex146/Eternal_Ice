@@ -30,13 +30,11 @@ Score_settings:
   # where k - linear_k_ and b - linear_b_
   # Note: y = [1, 0]
   # The function has the form of a step
-  linear_k_: 0.0
-  linear_b_: 1.0
+  linear_k: 0.0
+  linear_b: 1.0
 
 # Settings related to levels
 Levels_settings:
-  # The highest level, i.e. the number of levels
-  max_level: 1
   # Next comes the enumeration of the characteristics of each level according to the template below
   # Level_<level number>:
   #   cost: <integer> - the price of the level in score points
@@ -98,7 +96,7 @@ Abilities:
     low_lvl_message: A higher level is required to use!
     
   # Pull ability settings
-  Repulsion:
+  Pull:
     # Required level for use
     required_lvl: 1
     # Price in mana

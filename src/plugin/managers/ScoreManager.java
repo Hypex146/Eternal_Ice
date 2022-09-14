@@ -10,6 +10,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.Score;
@@ -36,7 +38,7 @@ public class ScoreManager {
 		cooldown_farm_key_ = new NamespacedKey(main_plugin_, "score_cooldown");
 	}
 	
-	public void updateParams() { // TODO make Map CHECK?
+	public void updateParams() {
 		FileConfiguration cfg = main_plugin_.getConfig();
 		EIConfigurator ei_cfg = main_plugin_.getEIConfigurator();
 		ConfigurationSection score_section = ei_cfg.getConfigurationSection(cfg, "Score_settings");
@@ -78,7 +80,7 @@ public class ScoreManager {
 		main_plugin_.getEILogger().log(LogLevel.DEBUG, Level.INFO, "Зарегистрировали новую цель в scorboard");
 	}
 
-	private double linear(int x) { // TODO CHECK?
+	private double linear(int x) {
 		double linear_k = (double) params_.get("linear_k");
 		double linear_b = (double) params_.get("linear_b");
 		double res = linear_k * x + linear_b;
@@ -88,15 +90,21 @@ public class ScoreManager {
 	}
 	
 	private void addCooldownFarm(Player player) {
-		int cooldown = player.getPersistentDataContainer().getOrDefault(cooldown_farm_key_, 
-				PersistentDataType.INTEGER, 0);
+		int cooldown = 0;
+		if (player.getPersistentDataContainer().has(cooldown_farm_key_, PersistentDataType.INTEGER)) {
+			cooldown = player.getPersistentDataContainer().getOrDefault(cooldown_farm_key_, 
+					PersistentDataType.INTEGER, 0);
+		}
 		cooldown++;
 		player.getPersistentDataContainer().set(cooldown_farm_key_, PersistentDataType.INTEGER, cooldown);
 	}
 	
 	private void reduceCooldownFarm(Player player, int count) {
-		int cooldown = player.getPersistentDataContainer().getOrDefault(cooldown_farm_key_, 
-				PersistentDataType.INTEGER, 0);
+		int cooldown = 0;
+		if (player.getPersistentDataContainer().has(cooldown_farm_key_, PersistentDataType.INTEGER)) {
+			cooldown = player.getPersistentDataContainer().getOrDefault(cooldown_farm_key_, 
+					PersistentDataType.INTEGER, 0);
+		}
 		cooldown -= count;
 		if (cooldown < 0) { cooldown = 0; }
 		player.getPersistentDataContainer().set(cooldown_farm_key_, PersistentDataType.INTEGER, cooldown);
@@ -123,11 +131,20 @@ public class ScoreManager {
 	}
 	
 	private int getCooldownFarm(Player player) {
-		return player.getPersistentDataContainer().getOrDefault(cooldown_farm_key_, PersistentDataType.INTEGER, 0);
+		int cooldown = 0;
+		if (player.getPersistentDataContainer().has(cooldown_farm_key_, PersistentDataType.INTEGER)) {
+			cooldown = player.getPersistentDataContainer().getOrDefault(
+					cooldown_farm_key_, PersistentDataType.INTEGER, 0);
+		}
+		return cooldown;
 	}
 	
 	public boolean takeRewardForMob(Player player, LivingEntity mob) {
-		int reward = mob.getPersistentDataContainer().getOrDefault(score_reward_key_, PersistentDataType.INTEGER, 0);
+		int reward = 0;
+		if (mob.getPersistentDataContainer().has(score_reward_key_, PersistentDataType.INTEGER)) {
+			reward = mob.getPersistentDataContainer().getOrDefault(
+					score_reward_key_, PersistentDataType.INTEGER, 0);
+		}
 		if (reward <= 0) { return false; }
 		reward = (int) Math.floor(reward * linear(getCooldownFarm(player))) + 1;
 		String score_name = (String) params_.get("score_name");
@@ -185,6 +202,23 @@ public class ScoreManager {
 		String score_name = (String) params_.get("score_name");
 		Score player_score = board_.getObjective(score_name).getScore(player.getName());
 		player_score.setScore(score);
+	}
+	
+	public void processPlayerDeathEvent(PlayerDeathEvent event) {
+		Player prey = event.getEntity();
+		Player killer = prey.getKiller();
+		if (killer == null || killer.equals(prey)) {
+			takePenaltyFromPlayer(prey);
+		} else {
+			takeRewardForPlayer(killer, prey);	
+		}
+	}
+	
+	public void processEntityDeathEvent(EntityDeathEvent event) {
+		LivingEntity mob = event.getEntity();
+		if (mob instanceof Player) { return; }
+		Player player = mob.getKiller();
+		takeRewardForMob(player, mob);
 	}
 	
 }

@@ -1,7 +1,5 @@
 package plugin.listeners;
 
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -20,21 +18,12 @@ public class DeathEventListener implements Listener {
 	
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent event) {
-		Player prey = event.getEntity();
-		Player killer = prey.getKiller();
-		if (killer == null) {
-			main_plugin_.getScoreManager().takePenaltyFromPlayer(prey);
-		} else {
-			main_plugin_.getScoreManager().takeRewardForPlayer(killer, prey);
-		}
+		main_plugin_.getScoreManager().processPlayerDeathEvent(event);
 	}
 	
 	@EventHandler
 	public void onEntityDeath(EntityDeathEvent event) {
-		LivingEntity mob = event.getEntity();
-		if (mob instanceof Player) { return; }
-		Player player = mob.getKiller();
-		main_plugin_.getScoreManager().takeRewardForMob(player, mob);
+		main_plugin_.getScoreManager().processEntityDeathEvent(event);
 	}
 	
 }

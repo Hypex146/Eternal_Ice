@@ -136,7 +136,7 @@ public class Repulsion implements Ability {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void useAbility(Player player) { // FIXME CHECK?
+	private void useAbility(Player player) {
 		player.sendMessage((String) params_.get("use_message"));
 		List<EntityType> filter = (ArrayList<EntityType>) params_.get("susceptible_entities");
 		Collection<LivingEntity> preys;
@@ -230,7 +230,8 @@ public class Repulsion implements Ability {
 				}
 			}
 		};
-		main_plugin_.getServer().getScheduler().scheduleSyncRepeatingTask(main_plugin_, task, 20, 20);
+		cooldown_task_id_ = main_plugin_.getServer().getScheduler().scheduleSyncRepeatingTask(
+				main_plugin_, task, 20, 20);
 	}
 
 	@Override

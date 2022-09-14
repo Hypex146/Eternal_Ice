@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.bukkit.entity.Player;
 
-public interface Ability { //TODO damage by player CHECK?
+public interface Ability {
 	
 	public void updateParams();
 	
@@ -16,7 +16,7 @@ public interface Ability { //TODO damage by player CHECK?
 	
 	public boolean canCall(Player player);
 	
-	public boolean onCall(Player player); //TODO cast ability on certain entities CHECK?
+	public boolean onCall(Player player);
 	
 	public boolean onCall(Player player, boolean forced);
 	

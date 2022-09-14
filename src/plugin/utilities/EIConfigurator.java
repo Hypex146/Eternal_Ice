@@ -165,4 +165,8 @@ public class EIConfigurator {
 		return config.getConfigurationSection(path);
 	}
 	
+	public boolean hasConfigurationSection(ConfigurationSection config, String path) {
+		return config.isConfigurationSection(path);
+	}
+	
 }

@@ -16,7 +16,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
-public abstract class MyUtilities { //TODO filter in looking at method CHECK?
+public abstract class MyUtilities {
 	
 	public static Collection<Entity> getNearbyEntities(World world, Location loc, 
 			double dist, Predicate<Entity> filter) {

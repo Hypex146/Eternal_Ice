@@ -163,41 +163,6 @@ public class PsyExplosion implements Ability {
 					}
 			}, 0);
 	}
-	
-//	private void useAbility(Player player) {
-//		player.sendMessage((String) ability_table_.get("use_message"));
-//		Location loc = player.getLocation();
-//		player.getWorld().spawnParticle(Particle.CLOUD, loc, 25, 0.5, 0.5, 0.5, 0.1);
-//		loc.setY(loc.getY() + 1D);
-//		int charging_time = (int) ability_table_.get("charging_time");
-//		main_plugin_.getServer().getScheduler().scheduleSyncDelayedTask(main_plugin_, 
-//				new Runnable() {
-//					private int count_ = 0;
-//					@Override
-//					public void run() {
-//						count_++;
-//						if (count_ <= charging_time) {
-//							player.teleport(loc);
-//							main_plugin_.getServer().getScheduler().scheduleSyncDelayedTask(
-//									main_plugin_, this, 1);
-//						} else {
-//							loc.setY(loc.getY() + 0.5D);
-//							player.getWorld().spawnParticle(Particle.DRAGON_BREATH, 
-//									loc, 75, 0.5, 0.5, 0.5, 0.25);
-//							List<EntityType> filter = new ArrayList<EntityType>();
-//							filter.add(EntityType.PLAYER);
-//							Collection<LivingEntity> preys = MyExpansion.getLookingEntities(
-//									player,
-//									MyExpansion.createPredicate(filter),
-//									(double) ability_table_.get("dist"),
-//									(double) ability_table_.get("cos_detect_angle"));
-//							for (LivingEntity prey : preys) {
-//								prey.damage((double) ability_table_.get("damage"));
-//							}
-//						}
-//					}
-//			}, 0);
-//	}
 
 	@Override
 	public boolean canCall(Player player) {

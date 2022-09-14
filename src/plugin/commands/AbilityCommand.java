@@ -71,12 +71,20 @@ public class AbilityCommand implements CommandExecutor {
 			sender.sendMessage("Предмет должен находится в основной руке!");
 			return false;
 		}
-		String right_tag = item_meta.getPersistentDataContainer().getOrDefault(
-				main_plugin_.getAbilityManager().getRightClickTag(), 
-				PersistentDataType.STRING, "не назначено");
-		String left_tag = item_meta.getPersistentDataContainer().getOrDefault(
-				main_plugin_.getAbilityManager().getLeftClickTag(), 
-				PersistentDataType.STRING, "не назначено");
+		String right_tag = "не назначено";
+		if (item_meta.getPersistentDataContainer().has(
+				main_plugin_.getAbilityManager().getRightClickTag(), PersistentDataType.STRING)) {
+			right_tag = item_meta.getPersistentDataContainer().getOrDefault(
+			main_plugin_.getAbilityManager().getRightClickTag(), 
+			PersistentDataType.STRING, "не назначено");
+		}
+		String left_tag = "не назначено";
+		if (item_meta.getPersistentDataContainer().has(
+				main_plugin_.getAbilityManager().getLeftClickTag(), PersistentDataType.STRING)) {
+			left_tag = item_meta.getPersistentDataContainer().getOrDefault(
+			main_plugin_.getAbilityManager().getLeftClickTag(), 
+			PersistentDataType.STRING, "не назначено");
+		}
 		sender.sendMessage("ПКМ: " + right_tag);
 		sender.sendMessage("ЛКМ: " + left_tag);
 		return true;

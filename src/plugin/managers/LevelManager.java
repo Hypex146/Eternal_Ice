@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -14,12 +15,13 @@ import org.bukkit.persistence.PersistentDataType;
 
 import plugin.EternalIce;
 import plugin.utilities.EIConfigurator;
+import plugin.utilities.LogLevel;
 
 public class LevelManager {
 	private EternalIce main_plugin_;
 	// configuration
 	private int max_level_;
-	private List<Map<String, Object>> level_params_; // TODO make Collection and Map CHECK?
+	private List<Map<String, Object>> level_params_;
 	// constants
 	private final NamespacedKey level_key_;
 	
@@ -33,16 +35,19 @@ public class LevelManager {
 		FileConfiguration cfg = main_plugin_.getConfig();
 		EIConfigurator ei_cfg = main_plugin_.getEIConfigurator();
 		ConfigurationSection level_section = ei_cfg.getConfigurationSection(cfg, "Levels_settings");
-		max_level_ = ei_cfg.getInt(level_section, "max_level", 1); //TODO another way to know max level
 		updateLevelInfo(level_section);
 	}
 	
 	private void updateLevelInfo(ConfigurationSection level_section) {
 		EIConfigurator ei_cfg = main_plugin_.getEIConfigurator();
 		level_params_.clear();
-		for (int i = 0; i < max_level_; i++) {
-			int level = i + 1;
+		int level = 1;
+		while (true) {
 			String field_name = "Level_" + level;
+			if (!ei_cfg.hasConfigurationSection(level_section, field_name)) {
+				max_level_ = level - 1;
+				break;
+			}
 			ConfigurationSection current_level_section = 
 					ei_cfg.getConfigurationSection(level_section, field_name);
 			Integer cost = ei_cfg.getInt(current_level_section, "cost", 1);
@@ -53,6 +58,7 @@ public class LevelManager {
 			level_info.put("mana_reserve", mana_reserve);
 			level_info.put("add_mana_value", add_mana_value);
 			level_params_.add(level_info);
+			level += 1;
 		}
 	}
 	
@@ -76,7 +82,13 @@ public class LevelManager {
 	public int getLevel(Player player) {
 		PersistentDataContainer container = player.getPersistentDataContainer();
 		if (container == null) { return -1; }
-		return container.getOrDefault(level_key_, PersistentDataType.INTEGER, 1);
+		int level = container.getOrDefault(level_key_, PersistentDataType.INTEGER, 1);
+		if (level > max_level_) {
+			level = max_level_;
+			main_plugin_.getEILogger().log(LogLevel.STANDART, Level.WARNING, 
+					"У игрока " + player.getName() + " некорректный уровень!");
+		}
+		return level;
 	}
 	
 	public boolean setLevel(Player player, int level) {

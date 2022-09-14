@@ -2,7 +2,6 @@ package plugin.managers;
 
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -15,7 +14,6 @@ import org.bukkit.scheduler.BukkitScheduler;
 
 import plugin.EternalIce;
 import plugin.utilities.EIConfigurator;
-import plugin.utilities.LogLevel;
 
 public class ManaManager {
 	private EternalIce main_plugin_;
@@ -96,16 +94,11 @@ public class ManaManager {
 		return ((float)current_mana / (float)max_mana);
 	}
 	
-	private void refillMana() { // FIXME level CHECK?
+	private void refillMana() {
 		for (World world : main_plugin_.getWorlds()) {
 			for (Player player : world.getPlayers()) {
 				List<Map<String, Object>> level_table = main_plugin_.getLevelManager().getLevelTable();
 				int level = main_plugin_.getLevelManager().getLevel(player);
-				if (level > main_plugin_.getLevelManager().getMaxLevel()) {
-					level = main_plugin_.getLevelManager().getMaxLevel();
-					main_plugin_.getEILogger().log(LogLevel.STANDART, Level.WARNING, 
-							"У игрока " + player.getName() + " некорректный уровень!");
-				}
 				int add_mana_value = (int) level_table.get(level - 1).get("add_mana_value");
 				addMana(player, add_mana_value, false);
 				player.setLevel(getMana(player));

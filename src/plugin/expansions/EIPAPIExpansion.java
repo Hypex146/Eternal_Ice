@@ -40,8 +40,8 @@ public class EIPAPIExpansion extends PlaceholderExpansion {
 		String score = ei_cfg.getString(placeholders_section, "score", "score");
 		placeholders_.put("level", level);
 		placeholders_.put("mana", mana);
-		placeholders_.put("cooldown", cooldown_right);
-		placeholders_.put("cooldown", cooldown_left);
+		placeholders_.put("cooldown_right", cooldown_right);
+		placeholders_.put("cooldown_left", cooldown_left);
 		placeholders_.put("score", score);
 	}
 

@@ -17,6 +17,7 @@ import plugin.EternalIce;
 import plugin.abilities.Abilities;
 import plugin.abilities.Ability;
 import plugin.abilities.PsyExplosion;
+import plugin.abilities.Pull;
 import plugin.abilities.Repulsion;
 import plugin.abilities.Stun;
 
@@ -24,7 +25,7 @@ public class AbilityManager {
 	private EternalIce main_plugin_;
 	// configuration
 	// constants
-	private final Map<Abilities, Ability> abilities_; // TODO rename all! CHECK?
+	private final Map<Abilities, Ability> abilities_;
 	private final NamespacedKey r_button_key_;
 	private final NamespacedKey l_button_key_;
 	
@@ -36,6 +37,7 @@ public class AbilityManager {
 		abilities_.put(Abilities.PSYEXPLOSION, new PsyExplosion(main_plugin_));
 		abilities_.put(Abilities.STUN, new Stun(main_plugin_));
 		abilities_.put(Abilities.REPULSION, new Repulsion(main_plugin_));
+		abilities_.put(Abilities.PULL, new Pull(main_plugin_));
 	}
 	
 	public void updateParams() {
@@ -51,7 +53,7 @@ public class AbilityManager {
 		});
 	}
 	
-	public int getCooldown(Player player, boolean isRBM) { // TODO CHECK?
+	public int getCooldown(Player player, boolean isRBM) {
 		ItemStack item_stack = player.getEquipment().getItemInMainHand();
 		PersistentDataContainer container = item_stack.getItemMeta().getPersistentDataContainer();
 		NamespacedKey current_key;
@@ -87,7 +89,10 @@ public class AbilityManager {
 			current_key = l_button_key_;
 		}
 		PersistentDataContainer container = item_stack.getItemMeta().getPersistentDataContainer();
-		String tag = container.getOrDefault(current_key, PersistentDataType.STRING, null);
+		String tag = null;
+		if (container.has(current_key, PersistentDataType.STRING)) {
+			tag = container.getOrDefault(current_key, PersistentDataType.STRING, null);
+		}
 		if (tag == null) { return; }
 		if (!(main_plugin_.getWorlds().contains(player.getWorld()))) {
 			player.sendMessage("¬ этом мире нельз€ пользоватьс€ способност€ми!");
